@@ -6,7 +6,7 @@ var builder = WebApplication.CreateSlimBuilder(args);
 
 var app = builder.Build();
 
-app.MapGet("/", () => GetInfo());
+app.MapGet("/", GetInfo);
 
 string? port = Environment.GetEnvironmentVariable("PORT");
 
@@ -19,11 +19,15 @@ else
     app.Run($"http://0.0.0.0:" + port);
 }
 
-static string GetInfo()
+static async Task<string> GetInfo()
 {
     var sb = new StringBuilder();
     sb.AppendLine($"CPU Count: {Environment.ProcessorCount}");
     sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
+    string cpuPlatform = await getInstanceInfo("cpu-platform");
+    string machineType = await getInstanceInfo("machine-type");
+    sb.AppendLine($"cpu-platform: {cpuPlatform}");
+    sb.AppendLine($"machine-type: {machineType}");
     sb.AppendLine();
 
     sb.AppendLine(RunProgram("lscpu"));
@@ -49,4 +53,11 @@ static string RunProgram(string program)
     {
         return $"Failed to start {program}: {ex}";
     }
+}
+
+async static Task<string> getInstanceInfo(string instanceAttribute)
+{
+    var client = new HttpClient();
+    client.DefaultRequestHeaders.Add("Metadata-Flavor", "Google");
+    return await client.GetStringAsync("http://metadata.google.internal/computeMetadata/v1/instance/" + instanceAttribute);
 }
