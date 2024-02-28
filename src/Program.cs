@@ -26,22 +26,27 @@ static string GetInfo()
     sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
     sb.AppendLine();
 
+    sb.AppendLine(RunProgram("lscpu"));
+    sb.AppendLine();
+    sb.AppendLine(RunProgram("env"));
+    return sb.ToString();
+}
+
+static string RunProgram(string program)
+{
     try
     {
-        var psi = new ProcessStartInfo("lscpu")
+        var psi = new ProcessStartInfo(program)
         {
             RedirectStandardOutput = true,
         };
 
         var p = Process.Start(psi)!;
         p.WaitForExit();
-        var output = p.StandardOutput.ReadToEnd();
-        sb.AppendLine(output);
+        return p.StandardOutput.ReadToEnd();
     }
     catch (Exception ex)
     {
-        sb.AppendLine("Failed to start lscpu:");
-        sb.AppendLine(ex.ToString());
+        return $"Failed to start {program}: {ex}";
     }
-    return sb.ToString();
 }
