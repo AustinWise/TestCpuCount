@@ -54,18 +54,13 @@ class Program
         }
     }
 
-    static async Task<string> GetInfo()
+    static string GetInfo()
     {
         var sb = new StringBuilder();
         sb.AppendLine($"Environment.ProcessorCount: {Environment.ProcessorCount}");
         sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
-        string directory = await getInstanceInfo("");
-        sb.AppendLine($"instance data directory: {directory}");
-        sb.AppendLine();
 
         sb.AppendLine(RunProgram("lscpu"));
-        sb.AppendLine();
-        sb.AppendLine(RunProgram("env"));
         sb.AppendLine();
         sb.AppendLine(RunProgram(cgrouperPath));
         sb.AppendLine();

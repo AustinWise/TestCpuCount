@@ -301,7 +301,7 @@ private:
             else
             {
                 puts("Unknown cgroup version in mountinfo.");
-                exit(1);
+                goto done;
             }
         }
     done:
