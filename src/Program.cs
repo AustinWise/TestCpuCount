@@ -1,85 +1,108 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime;
 using System.Text;
 
-var builder = WebApplication.CreateSlimBuilder(args);
 
-var app = builder.Build();
-
-app.MapGet("/", GetInfo);
-app.MapGet("/readfile", (string path) => File.ReadAllText(path));
-app.MapGet("/listdir", (string path) =>
+class Program
 {
-    var di = new DirectoryInfo(path);
-    var sb = new StringBuilder();
-    foreach (var fi in di.GetFileSystemInfos().OrderBy(f => f.Name))
+    static readonly string cgrouperPath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "cgrouper");
+
+    static void Main(string[] args)
     {
-        sb.Append(fi.Name);
-        if (fi is DirectoryInfo)
+        var builder = WebApplication.CreateSlimBuilder(args);
+
+
+        var app = builder.Build();
+
+        try
         {
-            sb.Append('/');
+            Process.Start("chmod", $"+x {cgrouperPath}");
         }
-        sb.AppendLine();
-    }
-    return sb.ToString();
-});
-
-string? port = Environment.GetEnvironmentVariable("PORT");
-
-if (string.IsNullOrEmpty(port))
-{
-    app.Run();
-}
-else
-{
-    app.Run($"http://0.0.0.0:" + port);
-}
-
-static async Task<string> GetInfo()
-{
-    var sb = new StringBuilder();
-    sb.AppendLine($"Environment.ProcessorCount: {Environment.ProcessorCount}");
-    sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
-    string directory = await getInstanceInfo("");
-    sb.AppendLine($"instance data directory: {directory}");
-    sb.AppendLine();
-
-    sb.AppendLine(RunProgram("lscpu"));
-    sb.AppendLine();
-    sb.AppendLine(RunProgram("env"));
-    sb.AppendLine();
-    return sb.ToString();
-}
-
-static string RunProgram(string program)
-{
-    try
-    {
-        var psi = new ProcessStartInfo(program)
+        catch (Exception ex)
         {
-            RedirectStandardOutput = true,
-        };
+            app.Logger.LogError(ex.ToString());
+        }
 
-        var p = Process.Start(psi)!;
-        p.WaitForExit();
-        return p.StandardOutput.ReadToEnd();
-    }
-    catch (Exception ex)
-    {
-        return $"Failed to start {program}: {ex}";
-    }
-}
+        app.MapGet("/", GetInfo);
+        app.MapGet("/readfile", (string path) => File.ReadAllText(path));
+        app.MapGet("/listdir", (string path) =>
+        {
+            var di = new DirectoryInfo(path);
+            var sb = new StringBuilder();
+            foreach (var fi in di.GetFileSystemInfos().OrderBy(f => f.Name))
+            {
+                sb.Append(fi.Name);
+                if (fi is DirectoryInfo)
+                {
+                    sb.Append('/');
+                }
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        });
 
-async static Task<string> getInstanceInfo(string instanceAttribute)
-{
-    var client = new HttpClient();
-    client.DefaultRequestHeaders.Add("Metadata-Flavor", "Google");
-    try
-    {
-        return await client.GetStringAsync("http://metadata.google.internal/computeMetadata/v1/instance/" + instanceAttribute);
+        string? port = Environment.GetEnvironmentVariable("PORT");
+
+        if (string.IsNullOrEmpty(port))
+        {
+            app.Run();
+        }
+        else
+        {
+            app.Run($"http://0.0.0.0:" + port);
+        }
     }
-    catch (Exception ex)
+
+    static async Task<string> GetInfo()
     {
-        return ex.ToString();
+        var sb = new StringBuilder();
+        sb.AppendLine($"Environment.ProcessorCount: {Environment.ProcessorCount}");
+        sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
+        string directory = await getInstanceInfo("");
+        sb.AppendLine($"instance data directory: {directory}");
+        sb.AppendLine();
+
+        sb.AppendLine(RunProgram("lscpu"));
+        sb.AppendLine();
+        sb.AppendLine(RunProgram("env"));
+        sb.AppendLine();
+        sb.AppendLine(RunProgram(cgrouperPath));
+        sb.AppendLine();
+        return sb.ToString();
     }
+
+    static string RunProgram(string program)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo(program)
+            {
+                RedirectStandardOutput = true,
+            };
+
+            var p = Process.Start(psi)!;
+            p.WaitForExit();
+            return p.StandardOutput.ReadToEnd();
+        }
+        catch (Exception ex)
+        {
+            return $"Failed to start {program}: {ex}";
+        }
+    }
+
+    async static Task<string> getInstanceInfo(string instanceAttribute)
+    {
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("Metadata-Flavor", "Google");
+        try
+        {
+            return await client.GetStringAsync("http://metadata.google.internal/computeMetadata/v1/instance/" + instanceAttribute);
+        }
+        catch (Exception ex)
+        {
+            return ex.ToString();
+        }
+    }
+
 }

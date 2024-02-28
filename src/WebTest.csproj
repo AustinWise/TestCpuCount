@@ -7,4 +7,24 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <MyCppInput>$(MSBuildThisFileDirectory)cgrouper.cpp</MyCppInput>
+    <MyCppOutput>$(MSBuildThisFileDirectory)cgrouper</MyCppOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MyCppOutput)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CompileMyCppProgram"
+          Inputs="$(MyCppInput)"
+          Outputs="$(MyCppOutput)"
+          BeforeTargets="CoreCompile">
+
+    <Exec Command="c++ $(MyCppInput) -o $(MyCppOutput)" />
+
+  </Target>
+
 </Project>
