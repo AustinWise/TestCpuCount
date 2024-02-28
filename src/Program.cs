@@ -59,5 +59,12 @@ async static Task<string> getInstanceInfo(string instanceAttribute)
 {
     var client = new HttpClient();
     client.DefaultRequestHeaders.Add("Metadata-Flavor", "Google");
-    return await client.GetStringAsync("http://metadata.google.internal/computeMetadata/v1/instance/" + instanceAttribute);
+    try
+    {
+        return await client.GetStringAsync("http://metadata.google.internal/computeMetadata/v1/instance/" + instanceAttribute);
+    }
+    catch (Exception ex)
+    {
+        return ex.ToString();
+    }
 }
