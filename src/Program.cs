@@ -7,6 +7,7 @@ var builder = WebApplication.CreateSlimBuilder(args);
 var app = builder.Build();
 
 app.MapGet("/", GetInfo);
+app.MapGet("/readfile", (string path) => File.ReadAllText(path));
 
 string? port = Environment.GetEnvironmentVariable("PORT");
 
@@ -22,19 +23,16 @@ else
 static async Task<string> GetInfo()
 {
     var sb = new StringBuilder();
-    sb.AppendLine($"CPU Count: {Environment.ProcessorCount}");
+    sb.AppendLine($"Environment.ProcessorCount: {Environment.ProcessorCount}");
     sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
-    string cpuPlatform = await getInstanceInfo("cpu-platform");
-    string machineType = await getInstanceInfo("machine-type");
     string directory = await getInstanceInfo("");
     sb.AppendLine($"instance data directory: {directory}");
-    sb.AppendLine($"cpu-platform: {cpuPlatform}");
-    sb.AppendLine($"machine-type: {machineType}");
     sb.AppendLine();
 
     sb.AppendLine(RunProgram("lscpu"));
     sb.AppendLine();
     sb.AppendLine(RunProgram("env"));
+    sb.AppendLine();
     return sb.ToString();
 }
 
