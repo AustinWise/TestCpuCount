@@ -26,6 +26,8 @@ static async Task<string> GetInfo()
     sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
     string cpuPlatform = await getInstanceInfo("cpu-platform");
     string machineType = await getInstanceInfo("machine-type");
+    string directory = await getInstanceInfo("");
+    sb.AppendLine($"instance data directory: {directory}");
     sb.AppendLine($"cpu-platform: {cpuPlatform}");
     sb.AppendLine($"machine-type: {machineType}");
     sb.AppendLine();
