@@ -7,7 +7,16 @@ var app = builder.Build();
 
 app.MapGet("/", () => GetInfo());
 
-app.Run();
+string? port = Environment.GetEnvironmentVariable("PORT");
+
+if (string.IsNullOrEmpty(port))
+{
+    app.Run();
+}
+else
+{
+    app.Run($"http://127.0.0.1:" + port);
+}
 
 static string GetInfo()
 {
