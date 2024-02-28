@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime;
 using System.Text;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -15,13 +16,14 @@ if (string.IsNullOrEmpty(port))
 }
 else
 {
-    app.Run($"http://127.0.0.1:" + port);
+    app.Run($"http://0.0.0.0:" + port);
 }
 
 static string GetInfo()
 {
     var sb = new StringBuilder();
     sb.AppendLine($"CPU Count: {Environment.ProcessorCount}");
+    sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
     sb.AppendLine();
 
     try
@@ -31,7 +33,7 @@ static string GetInfo()
             RedirectStandardOutput = true,
         };
 
-        var p = Process.Start(psi);
+        var p = Process.Start(psi)!;
         p.WaitForExit();
         var output = p.StandardOutput.ReadToEnd();
         sb.AppendLine(output);
