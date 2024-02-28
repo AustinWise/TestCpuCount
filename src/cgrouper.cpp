@@ -28,6 +28,7 @@ Abstract:
 
 #define CGROUP2_SUPER_MAGIC 0x63677270
 #define TMPFS_MAGIC 0x01021994
+#define SYSFS_MAGIC 0x62656572
 
 #define BASE_TEN 10
 
@@ -103,6 +104,13 @@ private:
         {
             case TMPFS_MAGIC: return 1;
             case CGROUP2_SUPER_MAGIC: return 2;
+            case SYSFS_MAGIC:
+            {
+                // XXX: added by austin
+                puts("found SYSFS_MAGIC, assuming cgroup vesion 1");
+                return 1;
+            }
+            break;
             default:
             {
                 printf("unexpected f_type: %ld\n", stats.f_type);
