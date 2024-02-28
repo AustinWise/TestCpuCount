@@ -8,6 +8,21 @@ var app = builder.Build();
 
 app.MapGet("/", GetInfo);
 app.MapGet("/readfile", (string path) => File.ReadAllText(path));
+app.MapGet("/listdir", (string path) =>
+{
+    var di = new DirectoryInfo(path);
+    var sb = new StringBuilder();
+    foreach (var fi in di.GetFileSystemInfos().OrderBy(f => f.Name))
+    {
+        sb.Append(fi.Name);
+        if (fi is DirectoryInfo)
+        {
+            sb.Append('/');
+        }
+        sb.AppendLine();
+    }
+    return sb.ToString();
+});
 
 string? port = Environment.GetEnvironmentVariable("PORT");
 
