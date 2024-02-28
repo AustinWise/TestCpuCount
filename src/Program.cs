@@ -62,12 +62,14 @@ class Program
 
         sb.AppendLine(RunProgram("lscpu"));
         sb.AppendLine();
+        sb.AppendLine(RunProgram("stat", "-f /sys/fs/cgroup"));
+        sb.AppendLine();
         sb.AppendLine(RunProgram(cgrouperPath));
         sb.AppendLine();
         return sb.ToString();
     }
 
-    static string RunProgram(string program)
+    static string RunProgram(string program, string? args = null)
     {
         try
         {
@@ -75,6 +77,10 @@ class Program
             {
                 RedirectStandardOutput = true,
             };
+            if (args != null)
+            {
+                psi.Arguments = args;
+            }
 
             var p = Process.Start(psi)!;
             p.WaitForExit();

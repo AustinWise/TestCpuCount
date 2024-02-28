@@ -94,14 +94,20 @@ private:
         int result = statfs("/sys/fs/cgroup", &stats);
 
         if (result != 0)
+        {
+            puts("failed to statfs /sys/fs/cgroup");
             return 0;
+        }
 
         switch (stats.f_type)
         {
             case TMPFS_MAGIC: return 1;
             case CGROUP2_SUPER_MAGIC: return 2;
             default:
+            {
+                printf("unexpected f_type: %ld\n", stats.f_type);
                 return 0;
+            }
         }
     }
 
