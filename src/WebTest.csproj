@@ -5,26 +5,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <MyCppInput>$(MSBuildThisFileDirectory)cgrouper.cpp</MyCppInput>
-    <MyCppOutput>$(MSBuildThisFileDirectory)cgrouper</MyCppOutput>
+    <ContainerRepository>us-central1-docker.pkg.dev/scientific-air-378704/cpu-test/cpu-test</ContainerRepository>
+    <PublishSelfContained>true</PublishSelfContained>
+    <!-- <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime-deps:8.0</ContainerBaseImage> -->
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MyCppOutput)">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <!-- At the time of writing, '8.0.0-dev' is the version of the runtime repo's shipping packages. -->
+    <FrameworkReference Update="Microsoft.NETCore.App" RuntimeFrameworkVersion="8.0.3" />
   </ItemGroup>
-
-  <Target Name="CompileMyCppProgram"
-          Inputs="$(MyCppInput)"
-          Outputs="$(MyCppOutput)"
-          BeforeTargets="CoreCompile">
-
-    <Exec Command="c++ $(MyCppInput) -o $(MyCppOutput)" />
-
-  </Target>
 
 </Project>

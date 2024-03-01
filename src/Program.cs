@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 
-
 class Program
 {
     static readonly string cgrouperPath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "cgrouper");
@@ -12,17 +11,7 @@ class Program
     {
         var builder = WebApplication.CreateSlimBuilder(args);
 
-
         var app = builder.Build();
-
-        try
-        {
-            Process.Start("chmod", $"+x {cgrouperPath}");
-        }
-        catch (Exception ex)
-        {
-            app.Logger.LogError(ex.ToString());
-        }
 
         app.MapGet("/", GetInfo);
         app.MapGet("/readfile", (string path) => File.ReadAllText(path));
@@ -57,14 +46,14 @@ class Program
     static string GetInfo()
     {
         var sb = new StringBuilder();
+        sb.AppendLine($"Environment.Version: {Environment.Version}");
         sb.AppendLine($"Environment.ProcessorCount: {Environment.ProcessorCount}");
         sb.AppendLine($"GCSettings.IsServerGC: {GCSettings.IsServerGC}");
+        sb.AppendLine();
 
         sb.AppendLine(RunProgram("lscpu"));
         sb.AppendLine();
         sb.AppendLine(RunProgram("stat", "-f /sys/fs/cgroup"));
-        sb.AppendLine();
-        sb.AppendLine(RunProgram(cgrouperPath));
         sb.AppendLine();
         return sb.ToString();
     }
