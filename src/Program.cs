@@ -62,6 +62,8 @@ class Program
 
         sb.AppendLine(RunProgram("lscpu"));
         sb.AppendLine();
+        sb.AppendLine(RunProgram("mount"));
+        sb.AppendLine();
         sb.AppendLine(RunProgram("stat", "-f /sys/fs/cgroup"));
         sb.AppendLine();
         sb.AppendLine(RunProgram(cgrouperPath));
